@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JEA.exe — John E. Auman</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0b0d14;
+      --bg2: #10131e;
+      --bg3: #151929;
+      --cyan: #00d4ff;
+      --cyan-dim: rgba(0,212,255,0.15);
+      --cyan-border: rgba(0,212,255,0.25);
+      --text: #e8eaf0;
+      --muted: #6b7280;
+      --muted2: #4b5563;
+      --border: rgba(255,255,255,0.07);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(11,13,20,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 56px;
+    }
+    .nav-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 15px; font-weight: 700;
+      color: var(--text); text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a {
+      font-size: 13px; color: var(--muted);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-status {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: #4ade80; font-weight: 500;
+    }
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #4ade80;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* HERO */
+    .hero {
+      padding: 5rem 2.5rem 4rem;
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3rem; align-items: center;
+    }
+    .hero-tag {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; color: var(--cyan);
+      border: 1px solid var(--cyan-border);
+      padding: 5px 12px; border-radius: 4px;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.05em;
+    }
+    .hero-name {
+      font-size: clamp(52px, 8vw, 90px);
+      font-weight: 700; line-height: 0.95;
+      letter-spacing: -2px;
+      margin-bottom: 0.5rem;
+    }
+    .hero-name .cyan { color: var(--cyan); }
+    .hero-role {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px; color: var(--muted);
+      margin-bottom: 1.5rem; letter-spacing: 0.05em;
+    }
+    .hero-desc {
+      font-size: 14px; color: var(--muted);
+      line-height: 1.7; max-width: 420px;
+      margin-bottom: 2rem;
+    }
+    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px; font-weight: 600;
+      padding: 11px 22px; border-radius: 6px;
+      cursor: pointer; text-decoration: none;
+      transition: all 0.2s; letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .btn-cyan {
+      background: var(--cyan); color: #000;
+      border: none;
+    }
+    .btn-cyan:hover { background: #33ddff; }
+    .btn-ghost {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.2); }
+
+    /* Terminal */
+    .terminal {
+      background: #0d1117;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; overflow: hidden;
+    }
+    .terminal-bar {
+      background: #161b22;
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .t-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .t-red { background: #ff5f57; }
+    .t-yellow { background: #febc2e; }
+    .t-green { background: #28c840; }
+    .t-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px; color: var(--muted);
+      margin-left: 8px;
+    }
+    .terminal-body { padding: 1.25rem 1.5rem; }
+    .t-line {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px; line-height: 2;
+    }
+    .t-prompt { color: var(--cyan); }
+    .t-cmd { color: #e8eaf0; }
+    .t-key { color: #79c0ff; }
+    .t-str { color: #a5d6ff; }
+    .t-num { color: #ffa657; }
+    .t-bool { color: #ff7b72; }
+    .t-bracket { color: var(--muted); }
+    .t-cursor {
+      display: inline-block; width: 8px; height: 14px;
+      background: var(--cyan); vertical-align: middle;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* SECTIONS */
+    section { max-width: 1200px; margin: 0 auto; padding: 5rem 2.5rem; }
+    .sec-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; color: var(--cyan);
+      letter-spacing: 0.1em; margin-bottom: 0.5rem;
+    }
+    .sec-title {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 700; letter-spacing: -1px;
+      margin-bottom: 2.5rem; line-height: 1;
+    }
+    .sec-title .ghost {
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,0.15);
+    }
+    .sec-divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 0 2.5rem;
+    }
+
+    /* SKILLS GRID */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .skill-card {
+      background: var(--bg2);
+      padding: 1.75rem;
+      transition: background 0.2s;
+    }
+    .skill-card:hover { background: var(--bg3); }
+    .skill-icon { font-size: 20px; margin-bottom: 12px; }
+    .skill-title {
+      font-size: 14px; font-weight: 600;
+      color: var(--text); margin-bottom: 6px;
+    }
+    .skill-desc {
+      font-size: 12px; color: var(--muted);
+      line-height: 1.6; margin-bottom: 14px;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; color: var(--cyan);
+      background: var(--cyan-dim);
+      border: 1px solid var(--cyan-border);
+      padding: 3px 8px; border-radius: 4px;
+      letter-spacing: 0.03em;
+    }
+
+    /* ABOUT */
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 2rem; align-items: start;
+    }
+    .about-text p {
+      font-size: 14px; color: var(--muted);
+      line-height: 1.8; margin-bottom: 1rem;
+    }
+    .achievements { margin-top: 1.5rem; }
+    .ach-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px; color: var(--muted);
+    }
+    .ach-dot { color: var(--cyan); font-size: 10px; }
+    .stats-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .stats-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+    }
+    .stat {
+      padding: 1.75rem;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+    .stat:nth-child(2n) { border-right: none; }
+    .stat:nth-child(3), .stat:nth-child(4) { border-bottom: none; }
+    .stat-num {
+      font-size: 28px; font-weight: 700;
+      color: var(--cyan); margin-bottom: 4px;
+    }
+    .stat-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; color: var(--muted);
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .edu-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem;
+      margin-top: 1rem;
+    }
+    .edu-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; color: var(--muted);
+      letter-spacing: 0.08em; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .edu-item { margin-bottom: 12px; }
+    .edu-item:last-child { margin-bottom: 0; }
+    .edu-degree { font-size: 13px; font-weight: 600; color: var(--text); }
+    .edu-course { font-size: 12px; color: var(--cyan); }
+    .edu-school { font-size: 12px; color: var(--muted); }
+
+    /* CONTACT */
+    .contact-section {
+      text-align: center;
+      padding: 5rem 2.5rem;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .contact-email {
+      font-size: clamp(20px, 4vw, 40px);
+      font-weight: 700; color: var(--cyan);
+      text-decoration: none; letter-spacing: -1px;
+      display: block; margin: 1rem 0 3rem;
+      word-break: break-all;
+    }
+    .contact-email:hover { text-decoration: underline; }
+    .contact-meta {
+      display: flex; justify-content: center;
+      gap: 3rem; flex-wrap: wrap;
+    }
+    .contact-item { text-align: center; }
+    .contact-item-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; color: var(--muted);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .contact-item-val { font-size: 14px; color: var(--text); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 2.5rem;
+      display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: wrap; gap: 8px;
+    }
+    footer span { font-size: 12px; color: var(--muted2); }
+
+    /* TOOLS SECTION */
+    .tools-section-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    .tool-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1rem;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 10px;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+      cursor: default;
+    }
+    .tool-card:hover {
+      border-color: var(--cyan-border);
+      background: var(--bg3);
+    }
+    .tool-logo {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .tool-name {
+      font-size: 13px; font-weight: 600; color: var(--text);
+    }
+    .tool-category {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    .tools-group-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; color: var(--muted);
+      letter-spacing: 0.08em; text-transform: uppercase;
+      margin: 2rem 0 1rem;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .tools-group-label::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--border);
+    }
+
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; }
+      .skills-grid { grid-template-columns: 1fr; }
+      .about-grid { grid-template-columns: 1fr; }
+      nav { padding: 0 1.25rem; }
+      .nav-links { display: none; }
+      section { padding: 3rem 1.25rem; }
+      .hero { padding: 3rem 1.25rem 2rem; }
+      .tools-section-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">JEA.exe</a>
+  <div class="nav-links">
+    <a href="#skills">Skills</a>
+    <a href="#tools">Tools</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="nav-status">
+    <div class="status-dot"></div>
+    AVAILABLE FOR WORK
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="hero-tag">[ SOCIAL MEDIA MANAGER · VIRTUAL ASSISTANT ]</div>
+    <div class="hero-name">
+      JOHN<br>
+      <span class="cyan">AUMAN</span>
+    </div>
+    <p class="hero-role">// SOCIAL MEDIA MANAGER &amp; CONTENT STRATEGIST</p>
+    <p class="hero-desc">Almost 1 year of hands-on experience managing social media for an Australian brand. Content strategy, video editing, AI-powered workflows, and community growth — delivered remotely.</p>
+    <div class="hero-btns">
+      <a class="btn btn-cyan" href="#contact">Get in touch</a>
+      <a class="btn btn-ghost" href="https://drive.google.com/uc?export=download&id=1_h26JAdK6HlUsEfONKkIWUueRak0GPtq" target="_blank">Download CV</a>
+    </div>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="t-dot t-red"></div>
+      <div class="t-dot t-yellow"></div>
+      <div class="t-dot t-green"></div>
+      <span class="t-title">johnauman — profile.sh</span>
+    </div>
+    <div class="terminal-body">
+      <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">cat profile.json</span></div>
+      <div class="t-line"><span class="t-bracket">{</span></div>
+      <div class="t-line">&nbsp;&nbsp;<span class="t-key">"name"</span>: <span class="t-str">"John E. Auman"</span>,</div>
+      <div class="t-line">&nbsp;&nbsp;<span class="t-key">"role"</span>: <span class="t-str">"Social Media Manager"</span>,</div>
+      <div class="t-line">&nbsp;&nbsp;<span class="t-key">"location"</span>: <span class="t-str">"Cebu, Philippines"</span>,</div>
+      <div class="t-line">&nbsp;&nbsp;<span class="t-key">"email"</span>: <span class="t-str">"aumanium911@gmail.com"</span>,</div>
+      <div class="t-line">&nbsp;&nbsp;<span class="t-key">"phone"</span>: <span class="t-str">"+63 908 207 0936"</span>,</div>
+      <div class="t-line">&nbsp;&nbsp;<span class="t-key">"experience"</span>: <span class="t-str">"~1 year"</span>,</div>
+      <div class="t-line">&nbsp;&nbsp;<span class="t-key">"specialties"</span>: <span class="t-bracket">[</span></div>
+      <div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Content Strategy"</span>,</div>
+      <div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Video Editing"</span>,</div>
+      <div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"AI-Powered Workflows"</span>,</div>
+      <div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Community Management"</span></div>
+      <div class="t-line">&nbsp;&nbsp;<span class="t-bracket">]</span>,</div>
+      <div class="t-line">&nbsp;&nbsp;<span class="t-key">"status"</span>: <span class="t-bool">"open_to_work"</span></div>
+      <div class="t-line"><span class="t-bracket">}</span></div>
+      <div class="t-line"><span class="t-prompt">$</span> <span class="t-cursor"></span></div>
+    </div>
+  </div>
+</div>
+
+<hr class="sec-divider"/>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="sec-label">02 / SKILLS</div>
+  <div class="sec-title">Technical <span class="ghost">Stack</span></div>
+  <div class="skills-grid">
+
+    <div class="skill-card">
+      <div class="skill-icon">📱</div>
+      <div class="skill-title">Social Media Management</div>
+      <div class="skill-desc">Content planning, scheduling, and platform-specific growth strategy across Meta, TikTok, and more.</div>
+      <div class="tags">
+        <span class="tag">Instagram</span>
+        <span class="tag">TikTok</span>
+        <span class="tag">Facebook</span>
+        <span class="tag">Strategy</span>
+      </div>
+    </div>
+
+    <div class="skill-card">
+      <div class="skill-icon">🎬</div>
+      <div class="skill-title">Video Editing & Reels</div>
+      <div class="skill-desc">Short-form and long-form content with hooks, pacing, and retention-focused editing to maximize watch time.</div>
+      <div class="tags">
+        <span class="tag">CapCut</span>
+        <span class="tag">Alight Motion</span>
+        <span class="tag">Reels</span>
+        <span class="tag">YouTube</span>
+      </div>
+    </div>
+
+    <div class="skill-card">
+      <div class="skill-icon">🎨</div>
+      <div class="skill-title">Design & Photo Editing</div>
+      <div class="skill-desc">Graphics design and mid-level photo editing for brand-consistent visual assets across all platforms.</div>
+      <div class="tags">
+        <span class="tag">Canva</span>
+        <span class="tag">Photoshop</span>
+        <span class="tag">Graphics</span>
+      </div>
+    </div>
+
+    <div class="skill-card">
+      <div class="skill-icon">🤖</div>
+      <div class="skill-title">AI-Powered Workflows</div>
+      <div class="skill-desc">Leveraging AI tools to speed up copywriting, content ideation, research, and campaign planning.</div>
+      <div class="tags">
+        <span class="tag">ChatGPT</span>
+        <span class="tag">Claude</span>
+        <span class="tag">Gemini</span>
+      </div>
+    </div>
+
+    <div class="skill-card">
+      <div class="skill-icon">🛒</div>
+      <div class="skill-title">E-commerce & Admin</div>
+      <div class="skill-desc">Shopify store management, product listings, and admin support tied to social content and sales.</div>
+      <div class="tags">
+        <span class="tag">Shopify</span>
+        <span class="tag">Trello</span>
+        <span class="tag">Slack</span>
+      </div>
+    </div>
+
+    <div class="skill-card">
+      <div class="skill-icon">📊</div>
+      <div class="skill-title">Content Strategy & Analytics</div>
+      <div class="skill-desc">Competitor research, audience gap analysis, and data-informed content strategy to grow reach and engagement.</div>
+      <div class="tags">
+        <span class="tag">Analytics</span>
+        <span class="tag">Research</span>
+        <span class="tag">Benchmarking</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="sec-divider"/>
+
+<!-- TOOLS -->
+<section id="tools">
+  <div class="sec-label">03 / TOOLS I USE</div>
+  <div class="sec-title">My <span class="ghost">Toolkit</span></div>
+
+  <div class="tools-group-label">Content & Design</div>
+  <div class="tools-section-grid">
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#1a0533;">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/canva.svg" width="28" height="28" style="filter: invert(51%) sepia(96%) saturate(400%) hue-rotate(225deg) brightness(100%);" alt="Canva"/>
+      </div>
+      <div>
+        <div class="tool-name">Canva</div>
+        <div class="tool-category">Design</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#001e36;">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/adobephotoshop.svg" width="28" height="28" style="filter: invert(55%) sepia(80%) saturate(400%) hue-rotate(175deg) brightness(110%);" alt="Photoshop"/>
+      </div>
+      <div>
+        <div class="tool-name">Photoshop</div>
+        <div class="tool-category">Photo Editing</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#0a0a0a;">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/capcut.svg" width="28" height="28" style="filter: invert(1);" alt="CapCut"/>
+      </div>
+      <div>
+        <div class="tool-name">CapCut</div>
+        <div class="tool-category">Video Editing</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#ff6b3520; font-size:26px;">🎬</div>
+      <div>
+        <div class="tool-name">Alight Motion</div>
+        <div class="tool-category">Motion Editing</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tools-group-label">AI Tools</div>
+  <div class="tools-section-grid">
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#0f2318;">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/openai.svg" width="28" height="28" style="filter: invert(60%) sepia(60%) saturate(400%) hue-rotate(110deg) brightness(110%);" alt="ChatGPT"/>
+      </div>
+      <div>
+        <div class="tool-name">ChatGPT</div>
+        <div class="tool-category">AI Writing</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#1a0f0a; font-size:26px;">🤖</div>
+      <div>
+        <div class="tool-name">Claude</div>
+        <div class="tool-category">AI Assistant</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#0a1628;">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/googlegemini.svg" width="28" height="28" style="filter: invert(50%) sepia(80%) saturate(400%) hue-rotate(200deg) brightness(120%);" alt="Gemini"/>
+      </div>
+      <div>
+        <div class="tool-name">Gemini</div>
+        <div class="tool-category">AI Research</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tools-group-label">Platforms & Project Management</div>
+  <div class="tools-section-grid">
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#0d2010;">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/shopify.svg" width="28" height="28" style="filter: invert(60%) sepia(80%) saturate(400%) hue-rotate(80deg) brightness(110%);" alt="Shopify"/>
+      </div>
+      <div>
+        <div class="tool-name">Shopify</div>
+        <div class="tool-category">E-commerce</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#1a0a1e;">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/slack.svg" width="28" height="28" style="filter: invert(50%) sepia(80%) saturate(300%) hue-rotate(260deg) brightness(120%);" alt="Slack"/>
+      </div>
+      <div>
+        <div class="tool-name">Slack</div>
+        <div class="tool-category">Communication</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#00223a;">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/trello.svg" width="28" height="28" style="filter: invert(50%) sepia(80%) saturate(400%) hue-rotate(180deg) brightness(120%);" alt="Trello"/>
+      </div>
+      <div>
+        <div class="tool-name">Trello</div>
+        <div class="tool-category">Project Mgmt</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#0a1f10;">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/buffer.svg" width="28" height="28" style="filter: invert(60%) sepia(80%) saturate(400%) hue-rotate(100deg) brightness(110%);" alt="Buffer"/>
+      </div>
+      <div>
+        <div class="tool-name">Buffer</div>
+        <div class="tool-category">Scheduling</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#1a0a00;">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/meta.svg" width="28" height="28" style="filter: invert(50%) sepia(80%) saturate(400%) hue-rotate(190deg) brightness(120%);" alt="Meta"/>
+      </div>
+      <div>
+        <div class="tool-name">Meta Business Suite</div>
+        <div class="tool-category">Social Mgmt</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#0a0a1a; font-size:26px;">🎵</div>
+      <div>
+        <div class="tool-name">TikTok Business</div>
+        <div class="tool-category">Ads & Analytics</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#1a0a0a; font-size:26px;">🎬</div>
+      <div>
+        <div class="tool-name">TikTok Studio</div>
+        <div class="tool-category">Content Studio</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-logo" style="background:#1a0a0a;">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/gmail.svg" width="28" height="28" style="filter: invert(40%) sepia(80%) saturate(400%) hue-rotate(340deg) brightness(110%);" alt="Gmail"/>
+      </div>
+      <div>
+        <div class="tool-name">Gmail</div>
+        <div class="tool-category">Communication</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sec-divider"/>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="sec-label">04 / ABOUT</div>
+  <div class="sec-title">The <span class="ghost">Person</span></div>
+  <div class="about-grid">
+    <div class="about-text">
+      <p>John E. Auman is a Social Media Manager based in Tayud, Consolacion, Cebu — with almost 1 year of experience managing content and community for FIFO Australia, a recruitment platform serving the Australian mining and resources sector.</p>
+      <p>His background spans digital content operations, AI-assisted workflows, video production, and graphic design — making him a versatile remote professional who delivers consistent, on-brand results.</p>
+      <p>A Cum Laude graduate and National ICT competitor, John brings the same precision and creativity to every piece of content he produces.</p>
+      <div class="achievements">
+        <div class="ach-item"><span class="ach-dot">◆</span> Latin Honor Cum Laude</div>
+        <div class="ach-item"><span class="ach-dot">◆</span> National Techno'Olympics — ICT Top 3 Contender</div>
+        <div class="ach-item"><span class="ach-dot">◆</span> MGlobal SCADA Training for IT Team (2025)</div>
+        <div class="ach-item"><span class="ach-dot">◆</span> Computer Systems Servicing NC II</div>
+        <div class="ach-item"><span class="ach-dot">◆</span> Proxy Teacher — PC Hardware Servicing</div>
+      </div>
+    </div>
+    <div>
+      <div class="stats-box">
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="stat-num">1+</div>
+            <div class="stat-label">Years Experience</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">10+</div>
+            <div class="stat-label">Tools Mastered</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">3</div>
+            <div class="stat-label">AI Platforms</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">3</div>
+            <div class="stat-label">Languages Spoken</div>
+          </div>
+        </div>
+      </div>
+      <div class="edu-box">
+        <div class="edu-label">Education</div>
+        <div class="edu-item">
+          <div class="edu-degree">Bachelor of Industrial Technology</div>
+          <div class="edu-course">Computer Technology</div>
+          <div class="edu-school">Cebu Technological University</div>
+        </div>
+        <div class="edu-item">
+          <div class="edu-degree">Pre-Baccalaureate</div>
+          <div class="edu-course">STEM Specialized</div>
+          <div class="edu-school">University of Cebu</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sec-divider"/>
+
+<!-- CONTACT -->
+<div class="contact-section" id="contact">
+  <div class="sec-label" style="text-align:center;">05 / CONTACT</div>
+  <div class="sec-title" style="letter-spacing:-1px;">Let's <span class="ghost">Connect</span></div>
+  <a class="contact-email" href="mailto:aumanium911@gmail.com">aumanium911@gmail.com</a>
+  <div class="contact-meta">
+    <div class="contact-item">
+      <div class="contact-item-label">Phone</div>
+      <div class="contact-item-val">+63 908 207 0936</div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-item-label">Location</div>
+      <div class="contact-item-val">Tayud, Consolacion, Cebu</div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-item-label">Status</div>
+      <div class="contact-item-val" style="color:#4ade80;">● Available for Work</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2025 John E. Auman</span>
+  <span>SOCIAL MEDIA MANAGER · VIRTUAL ASSISTANT</span>
+  <span>Cebu, Philippines</span>
+</footer>
+
+</body>
+</html>
